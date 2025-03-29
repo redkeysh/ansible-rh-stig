@@ -1,0 +1,343 @@
+###############################################
+# V-257782 | rng-tools
+# Install rng-tools and enable the rngd service.
+###############################################
+- name: Ensure rng-tools package is installed (V-257782)
+  package:
+    name: rng-tools
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.rng_tools
+  tags:
+    - V-257782
+    - rng_tools
+
+- name: Ensure rngd service is enabled and running (V-257782)
+  service:
+    name: rngd
+    state: started
+    enabled: yes
+  become: yes
+  when: ansible-rh-stig.services.rngd
+  tags:
+    - V-257782
+    - rngd
+
+###############################################
+# V-257839 | gnutls-utils
+# Install gnutls-utils package.
+###############################################
+- name: Ensure gnutls-utils package is installed (V-257839)
+  package:
+    name: gnutls-utils
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.gnutls_utils
+  tags:
+    - V-257839
+    - gnutls_utils
+
+###############################################
+# V-257840 | nss-tools
+# Install nss-tools package.
+###############################################
+- name: Ensure nss-tools package is installed (V-257840)
+  package:
+    name: nss-tools
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.nss_tools
+  tags:
+    - V-257840
+    - nss_tools
+
+###############################################
+# V-257838 | openssl-pkcs11
+# Install openssl-pkcs11 package.
+###############################################
+- name: Ensure openssl-pkcs11 package is installed (V-257838)
+  package:
+    name: openssl-pkcs11
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.openssl_pkcs11
+  tags:
+    - V-257838
+    - openssl_pkcs11
+
+###############################################
+# V-257842 | s-nail
+# Install s-nail package.
+###############################################
+- name: Ensure s-nail package is installed (V-257842)
+  package:
+    name: s-nail
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.s_nail
+  tags:
+    - V-257842
+    - s_nail
+
+###############################################
+# V-257935 | firewalld
+# Ensure firewalld package is installed.
+###############################################
+- name: Ensure firewalld package is installed (V-257935)
+  package:
+    name: firewalld
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.firewalld
+  tags:
+    - V-257935
+    - firewalld
+
+###############################################
+# V-257954 | libreswan
+# Install libreswan package.
+###############################################
+- name: Ensure libreswan package is installed (V-257954)
+  package:
+    name: libreswan
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.libreswan
+  tags:
+    - V-257954
+    - libreswan
+
+###############################################
+# V-257978 | openssh-server
+# Install openssh-server package.
+###############################################
+- name: Ensure openssh-server package is installed (V-257978)
+  package:
+    name: openssh-server
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.openssh_server
+  tags:
+    - V-257978
+    - openssh_server
+
+###############################################
+# V-257980 | openssh-clients
+# Install openssh-clients package.
+###############################################
+- name: Ensure openssh-clients package is installed (V-257980)
+  package:
+    name: openssh-clients
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.openssh_clients
+  tags:
+    - V-257980
+    - openssh_clients
+
+###############################################
+# V-258035 | usbguard
+# Install usbguard package and enable its service.
+###############################################
+- name: Ensure usbguard package is installed (V-258035)
+  package:
+    name: usbguard
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.usbguard
+  tags:
+    - V-258035
+    - usbguard
+
+- name: Ensure usbguard service is enabled and running (V-258035)
+  service:
+    name: usbguard
+    state: started
+    enabled: yes
+  become: yes
+  when: ansible-rh-stig.services.usbguard
+  tags:
+    - V-258035
+    - usbguard
+
+###############################################
+# V-258081 | policycoreutils
+# Install policycoreutils package.
+###############################################
+- name: Ensure policycoreutils package is installed (V-258081)
+  package:
+    name: policycoreutils
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.policycoreutils
+  tags:
+    - V-258081
+    - policycoreutils
+
+###############################################
+# V-258082 | policycoreutils-python-utils
+# Install policycoreutils-python-utils package.
+###############################################
+- name: Ensure policycoreutils-python-utils package is installed (V-258082)
+  package:
+    name: policycoreutils-python-utils
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.policycoreutils_python_utils
+  tags:
+    - V-258082
+    - policycoreutils_python_utils
+
+###############################################
+# V-258083 | sudo
+# Install sudo package.
+###############################################
+- name: Ensure sudo package is installed (V-258083)
+  package:
+    name: sudo
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.sudo
+  tags:
+    - V-258083
+    - sudo
+
+###############################################
+# V-258089 | fapolicyd
+# Install fapolicyd package.
+###############################################
+- name: Ensure fapolicyd package is installed (V-258089)
+  package:
+    name: fapolicyd
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.fapolicyd
+  tags:
+    - V-258089
+    - fapolicyd
+
+###############################################
+# V-258124 | pcsc-lite
+# Install pcsc-lite package.
+###############################################
+- name: Ensure pcsc-lite package is installed (V-258124)
+  package:
+    name: pcsc-lite
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.pcsc_lite
+  tags:
+    - V-258124
+    - pcsc_lite
+
+###############################################
+# V-258126 | opensc
+# Install opensc package.
+###############################################
+- name: Ensure opensc package is installed (V-258126)
+  package:
+    name: opensc
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.opensc
+  tags:
+    - V-258126
+    - opensc
+
+###############################################
+# V-258134 | AIDE
+# Install AIDE, initialize its database, and verify its existence.
+###############################################
+- name: Ensure AIDE package is installed (V-258134)
+  package:
+    name: aide
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.aide
+  tags:
+    - V-258134
+    - aide
+
+- name: Initialize AIDE database if not already initialized (V-258134)
+  command: /usr/sbin/aide --init
+  args:
+    creates: /var/lib/aide/aide.db.new.gz
+  become: yes
+  when: ansible-rh-stig.packages.aide
+  tags:
+    - V-258134
+    - aide
+
+- name: Check if AIDE database exists (V-258134)
+  stat:
+    path: /var/lib/aide/aide.db.gz
+  register: aide_db
+  become: yes
+  when: ansible-rh-stig.packages.aide
+  tags:
+    - V-258134
+    - aide
+
+- name: Fail if AIDE database is missing (V-258134)
+  fail:
+    msg: "AIDE database /var/lib/aide/aide.db.gz is missing."
+  when: ansible-rh-stig.packages.aide and not aide_db.stat.exists
+  tags:
+    - V-258134
+    - aide
+
+###############################################
+# V-258140 | rsyslogd
+# Install rsyslog package.
+###############################################
+- name: Ensure rsyslog package is installed (V-258140)
+  package:
+    name: rsyslog
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.rsyslog
+  tags:
+    - V-258140
+    - rsyslog
+
+###############################################
+# V-258141 | rsyslog-gnutls
+# Install rsyslog-gnutls package.
+###############################################
+- name: Ensure rsyslog-gnutls package is installed (V-258141)
+  package:
+    name: rsyslog-gnutls
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.rsyslog_gnutls
+  tags:
+    - V-258141
+    - rsyslog_gnutls
+
+###############################################
+# V-258151 | audit
+# Install audit package.
+###############################################
+- name: Ensure audit package is installed (V-258151)
+  package:
+    name: audit
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.audit
+  tags:
+    - V-258151
+    - audit
+
+###############################################
+# V-258175 | audispd-plugins
+# Install audispd-plugins package.
+###############################################
+- name: Ensure audispd-plugins package is installed (V-258175)
+  package:
+    name: audispd-plugins
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.audispd_plugins
+  tags:
+    - V-258175
+    - audispd_plugins

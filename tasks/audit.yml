@@ -1,0 +1,287 @@
+
+
+- name: Ensure GRUB_CMDLINE_LINUX includes audit=1 in /etc/default/grub (V-257796)
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX'
+    line: 'GRUB_CMDLINE_LINUX="audit=1"'
+    create: yes
+  become: yes
+  tags:
+    - V-257796
+    - RHEL-09-212055
+    - audit_pre_daemon
+
+###############################################
+# V-257887 | RHEL-09-232035
+# Rule Title: RHEL 9 audit tools must have a mode of 0755 or less permissive.
+# Fix Text: Set audit tool binaries to mode 0755.
+###############################################
+- name: Ensure audit tools have mode 0755 or less permissive (V-257887)
+  file:
+    path: "{{ item }}"
+    mode: '0755'
+  loop:
+    - /sbin/auditctl
+    - /sbin/aureport
+    - /sbin/ausearch
+    - /sbin/autrace
+    - /sbin/auditd
+    - /sbin/rsyslogd
+    - /sbin/augenrules
+  become: yes
+  tags:
+    - V-257887
+    - RHEL-09-232035
+    - audit_tools
+
+###############################################
+# V-257924 | RHEL-09-232220
+# Rule Title: RHEL 9 audit tools must be owned by root.
+# Fix Text: Change the owner of audit tools to root.
+###############################################
+- name: Ensure audit tools are owned by root (V-257924)
+  file:
+    path: "{{ item }}"
+    owner: root
+  loop:
+    - /sbin/auditctl
+    - /sbin/aureport
+    - /sbin/ausearch
+    - /sbin/autrace
+    - /sbin/auditd
+    - /sbin/rsyslogd
+    - /sbin/augenrules
+  become: yes
+  tags:
+    - V-257924
+    - RHEL-09-232220
+    - audit_tools
+
+###############################################
+# V-257925 | RHEL-09-232225
+# Rule Title: RHEL 9 audit tools must be group-owned by root.
+# Fix Text: Change the group ownership of audit tools to root.
+###############################################
+- name: Ensure audit tools are group-owned by root (V-257925)
+  file:
+    path: "{{ item }}"
+    group: root
+  loop:
+    - /sbin/auditctl
+    - /sbin/aureport
+    - /sbin/ausearch
+    - /sbin/autrace
+    - /sbin/auditd
+    - /sbin/rsyslogd
+    - /sbin/augenrules
+  become: yes
+  tags:
+    - V-257925
+    - RHEL-09-232225
+    - audit_tools
+
+###############################################
+# V-257924 | RHEL-09-232220
+# Rule Title: RHEL 9 audit tools must be owned by root.
+# Fix Text: Configure the audit tools to be owned by "root".
+###############################################
+- name: Ensure audit tools are owned by root (V-257924)
+  file:
+    path: "{{ item }}"
+    owner: root
+  loop:
+    - /sbin/auditctl
+    - /sbin/aureport
+    - /sbin/ausearch
+    - /sbin/autrace
+    - /sbin/auditd
+    - /sbin/rsyslogd
+    - /sbin/augenrules
+  become: yes
+  tags:
+    - V-257924
+    - RHEL-09-232220
+    - audit_tools
+
+###############################################
+# V-257925 | RHEL-09-232225
+# Rule Title: RHEL 9 audit tools must be group-owned by root.
+# Fix Text: Configure the audit tools to be group-owned by "root".
+###############################################
+- name: Ensure audit tools are group-owned by root (V-257925)
+  file:
+    path: "{{ item }}"
+    group: root
+  loop:
+    - /sbin/auditctl
+    - /sbin/aureport
+    - /sbin/ausearch
+    - /sbin/autrace
+    - /sbin/auditd
+    - /sbin/rsyslogd
+    - /sbin/augenrules
+  become: yes
+  tags:
+    - V-257925
+    - RHEL-09-232225
+    - audit_tools
+
+
+
+###############################################
+# V-257953 | RHEL-09-252060
+# Rule Title: RHEL 9 must forward mail from postmaster to the root account.
+# Fix Text: Append "postmaster: root" to /etc/aliases and run newaliases.
+###############################################
+- name: Ensure postmaster alias directs mail to root (V-257953)
+  lineinfile:
+    path: /etc/aliases
+    regexp: '^postmaster:'
+    line: 'postmaster: root'
+    create: yes
+  become: yes
+  notify: run newaliases
+  tags:
+    - V-257953
+    - RHEL-09-252060
+    - aliases
+
+###############################################
+# V-258037 | RHEL-09-291025
+# Rule Title: RHEL 9 must enable Linux audit logging for the USBGuard daemon.
+# Fix Text: Configure AuditBackend to "LinuxAudit" in /etc/usbguard/usbguard-daemon.conf.
+###############################################
+- name: Set AuditBackend to LinuxAudit in USBGuard daemon configuration (V-258037)
+  lineinfile:
+    path: /etc/usbguard/usbguard-daemon.conf
+    regexp: '^AuditBackend='
+    line: 'AuditBackend=LinuxAudit'
+    create: yes
+  become: yes
+  tags:
+    - V-258037
+    - RHEL-09-291025
+    - usbguard
+    - audit
+
+###############################################
+# V-258070 | RHEL-09-412045
+# Rule Title: RHEL 9 must log username information when unsuccessful logon attempts occur.
+# Fix Text: Configure /etc/security/faillock.conf with the "audit" option.
+###############################################
+- name: Ensure /etc/security/faillock.conf has audit option (V-258070)
+  lineinfile:
+    path: /etc/security/faillock.conf
+    regexp: '^audit\s*='
+    line: 'audit = audit'
+    create: yes
+  become: yes
+  tags:
+    - V-258070
+    - RHEL-09-412045
+    - faillock
+    - audit
+
+###############################################
+# V-258091 | RHEL-09-611010
+# Rule Title: RHEL 9 must ensure the password complexity module in system-auth is configured for three retries or less.
+# Fix Text: Configure the "retry" option in /etc/security/pwquality.conf.
+###############################################
+- name: Ensure pwquality retry value is set to 3 (V-258091)
+  lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^retry\s*='
+    line: 'retry = 3'
+    create: yes
+  become: yes
+  tags:
+    - V-258091
+    - RHEL-09-611010
+    - pwquality
+
+###############################################
+# V-258091 | RHEL-09-611010
+# Rule Title: RHEL 9 must ensure the password complexity module in the system-auth file
+# is configured for three retries or less.
+# Fix Text: Add/update "retry = 3" in /etc/security/pwquality.conf or a file under /etc/security/pwquality.conf.d/
+###############################################
+- name: Ensure pwquality retry value is set to 3 in /etc/security/pwquality.conf
+  lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^\s*retry\s*='
+    line: 'retry = 3'
+    create: yes
+  become: yes
+  tags:
+    - V-258091
+    - RHEL-09-611010
+    - pwquality
+    - password
+
+- name: Ensure pwquality retry value is set to 3 in /etc/security/pwquality.conf.d/99_custom.conf
+  lineinfile:
+    path: /etc/security/pwquality.conf.d/99_custom.conf
+    regexp: '^\s*retry\s*='
+    line: 'retry = 3'
+    create: yes
+  become: yes
+  tags:
+    - V-258091
+    - RHEL-09-611010
+    - pwquality
+    - password
+    
+###############################################
+# V-258146 | RHEL-09-652040
+# Rule Title: RHEL 9 must authenticate the remote logging server for offloading audit logs.
+# Fix Text: Set ActionSendStreamDriverAuthMode to x509/name in rsyslog configuration.
+###############################################
+- name: Ensure rsyslog authenticates remote logging server (ActionSendStreamDriverAuthMode)
+  lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^\$ActionSendStreamDriverAuthMode'
+    line: '$ActionSendStreamDriverAuthMode x509/name'
+    create: yes
+  become: yes
+  tags:
+    - V-258146
+    - RHEL-09-652040
+    - rsyslog
+    - remote_logging
+
+###############################################
+# V-258147 | RHEL-09-652045
+# Rule Title: RHEL 9 must encrypt offloaded audit records via rsyslog.
+# Fix Text: Set ActionSendStreamDriverMode to 1 in rsyslog configuration.
+###############################################
+- name: Ensure rsyslog encrypts offloaded audit records (ActionSendStreamDriverMode)
+  lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^\$ActionSendStreamDriverMode'
+    line: '$ActionSendStreamDriverMode 1'
+    create: yes
+  become: yes
+  tags:
+    - V-258147
+    - RHEL-09-652045
+    - rsyslog
+    - remote_logging
+
+###############################################
+# V-258148 | RHEL-09-652050
+# Rule Title: RHEL 9 must encrypt via the gtls driver the transfer of offloaded audit records.
+# Fix Text: Set DefaultNetstreamDriver to gtls in rsyslog configuration.
+###############################################
+- name: Ensure rsyslog uses the gtls driver for offloaded audit records
+  lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^\$DefaultNetstreamDriver'
+    line: '$DefaultNetstreamDriver gtls'
+    create: yes
+  become: yes
+  tags:
+    - V-258148
+    - RHEL-09-652050
+    - rsyslog
+    - remote_logging

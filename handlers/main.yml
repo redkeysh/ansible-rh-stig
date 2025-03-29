@@ -1,0 +1,16 @@
+---
+- name: run newaliases
+  command: newaliases
+  become: yes
+
+
+- name: reload_firewalld
+  command: firewall-cmd --reload
+  become: yes
+
+
+- name: restart sshd
+  service:
+    name: sshd
+    state: restarted
+  become: yes

@@ -1,0 +1,44 @@
+---
+ansible-rh-stig:
+  ssh:
+    pubkey_mode: "0644"            # Mode for public host key files
+    pubkey_owner: "root"           # Owner for public host key files
+    pubkey_group: "root"           # Group for public host key files
+
+  firewall:
+    default_zone: drop
+    allowed_services:
+      - ssh
+      - http
+      - https
+
+  audit:
+    max_log_file: 8
+    log_file_path: /etc/audit/auditd.conf
+    
+  packages:
+    rng_tools: true
+    gnutls_utils: true
+    nss_tools: true
+    openssl_pkcs11: true
+    s_nail: true
+    firewalld: true
+    libreswan: true
+    openssh_server: true
+    openssh_clients: true
+    usbguard: true
+    policycoreutils: true
+    policycoreutils_python_utils: true
+    sudo: true
+    fapolicyd: true
+    pcsc_lite: true
+    opensc: true
+    aide: true
+    rsyslog: true
+    rsyslog_gnutls: true
+    audit: true
+    audispd_plugins: true
+
+  services:
+    rngd: true
+    usbguard: true

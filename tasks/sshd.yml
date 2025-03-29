@@ -1,0 +1,34 @@
+###############################################
+# V-257979 | RHEL-09-255015
+# Rule Title: The sshd service on RHEL 9 must be active.
+# Fix Text: Enable the sshd service.
+###############################################
+- name: Ensure sshd service is enabled and running (V-257979)
+  service:
+    name: "sshd"
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - V-257979
+    - RHEL-09-255015
+    - sshd
+
+###############################################
+# V-258001 | RHEL-09-255125
+# Rule Title: SSH public host key files must have mode 0644.
+# Fix Text: Change the mode of public host key files under /etc/ssh to 0644.
+###############################################
+- name: Ensure SSH public host key files have mode {{ ansible-rh-stig.ssh.pubkey_mode }} (V-258001)
+  file:
+    path: "{{ item }}"
+    mode: "{{ ansible-rh-stig.ssh.pubkey_mode }}"
+    owner: "{{ ansible-rh-stig.ssh.pubkey_owner }}"
+    group: "{{ ansible-rh-stig.ssh.pubkey_group }}"
+  loop: "{{ lookup('fileglob', '/etc/ssh/*key.pub', wantlist=True) }}"
+  become: yes
+  notify: restart sshd
+  tags:
+    - V-258001
+    - RHEL-09-255125
+    - sshd

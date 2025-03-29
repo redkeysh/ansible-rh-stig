@@ -1,0 +1,35 @@
+###############################################
+# V-258078 | RHEL-09-431010
+# Rule Title: RHEL 9 must use a Linux Security Module configured to enforce limits on system services.
+# Fix Text: Ensure SELinux is set to "enforcing".
+###############################################
+- name: Ensure SELinux is set to enforcing in /etc/selinux/config (V-258078)
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: 'SELINUX=enforcing'
+    create: yes
+  become: yes
+  tags:
+    - V-258078
+    - RHEL-09-431010
+    - selinux
+
+- name: Verify SELinux is enforcing (V-258078)
+  command: getenforce
+  register: selinux_status
+  changed_when: false
+  become: yes
+  tags:
+    - V-258078
+    - RHEL-09-431010
+    - selinux
+
+- name: Fail if SELinux is not enforcing (V-258078)
+  fail:
+    msg: "SELinux is not enforcing. Remediation required."
+  when: selinux_status.stdout | lower != "enforcing"
+  tags:
+    - V-258078
+    - RHEL-09-431010
+    - selinux

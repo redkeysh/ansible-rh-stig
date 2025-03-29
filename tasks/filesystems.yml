@@ -1,0 +1,142 @@
+###############################################
+# V-257843 | RHEL-09-231010
+# Rule Title: A separate RHEL 9 file system must be used for user home directories.
+# Fix Text: Migrate the /home directory onto a separate file system.
+###############################################
+- name: Check if /home is mounted on a separate filesystem (V-257843)
+  command: mount | grep " on /home "
+  register: home_mount
+  changed_when: false
+  become: yes
+  tags:
+    - V-257843
+    - RHEL-09-231010
+
+- name: Fail if /home is not mounted on a separate filesystem (V-257843)
+  fail:
+    msg: "/home is not mounted on a separate filesystem. Remediation required."
+  when: home_mount.stdout == ""
+  tags:
+    - V-257843
+    - RHEL-09-231010
+
+###############################################
+# V-257847 | RHEL-09-231030
+# Rule Title: RHEL 9 must use a separate file system for the system audit data path.
+# Fix Text: Migrate /var/log/audit onto a separate file system.
+###############################################
+- name: Check if /var/log/audit is mounted on a separate filesystem (V-257847)
+  command: mount | grep " on /var/log/audit "
+  register: audit_mount
+  changed_when: false
+  become: yes
+  tags:
+    - V-257847
+    - RHEL-09-231030
+    - audit_partition
+
+- name: Fail if /var/log/audit is not mounted on a separate filesystem (V-257847)
+  fail:
+    msg: "/var/log/audit is not mounted on a separate filesystem. Remediation required."
+  when: audit_mount.stdout == ""
+  tags:
+    - V-257847
+    - RHEL-09-231030
+    - audit_partition
+
+###############################################
+# V-257873 | RHEL-09-231160
+# Rule Title: RHEL 9 must mount /var/log/audit with the nodev option.
+# Fix Text: Modify /etc/fstab or remount /var/log/audit with the nodev option.
+###############################################
+- name: Check /var/log/audit mount options for nodev (V-257873)
+  command: mount | grep " on /var/log/audit "
+  register: mount_options_nodev
+  changed_when: false
+  become: yes
+  tags:
+    - V-257873
+    - RHEL-09-231160
+    - audit_mount_options
+
+- name: Fail if /var/log/audit is not mounted with nodev (V-257873)
+  fail:
+    msg: "/var/log/audit is not mounted with nodev option. Remediation required."
+  when: "'nodev' not in mount_options_nodev.stdout"
+  tags:
+    - V-257873
+    - RHEL-09-231160
+    - audit_mount_options
+
+###############################################
+# V-257874 | RHEL-09-231165
+# Rule Title: RHEL 9 must mount /var/log/audit with the noexec option.
+# Fix Text: Modify /etc/fstab or remount /var/log/audit with the noexec option.
+###############################################
+- name: Check /var/log/audit mount options for noexec (V-257874)
+  command: mount | grep " on /var/log/audit "
+  register: mount_options_noexec
+  changed_when: false
+  become: yes
+  tags:
+    - V-257874
+    - RHEL-09-231165
+    - audit_mount_options
+
+- name: Fail if /var/log/audit is not mounted with noexec (V-257874)
+  fail:
+    msg: "/var/log/audit is not mounted with noexec option. Remediation required."
+  when: "'noexec' not in mount_options_noexec.stdout"
+  tags:
+    - V-257874
+    - RHEL-09-231165
+    - audit_mount_options
+
+###############################################
+# V-257875 | RHEL-09-231170
+# Rule Title: RHEL 9 must mount /var/log/audit with the nosuid option.
+# Fix Text: Modify /etc/fstab or remount /var/log/audit with the nosuid option.
+###############################################
+- name: Check /var/log/audit mount options for nosuid (V-257875)
+  command: mount | grep " on /var/log/audit "
+  register: mount_options_nosuid
+  changed_when: false
+  become: yes
+  tags:
+    - V-257875
+    - RHEL-09-231170
+    - audit_mount_options
+
+- name: Fail if /var/log/audit is not mounted with nosuid (V-257875)
+  fail:
+    msg: "/var/log/audit is not mounted with nosuid option. Remediation required."
+  when: "'nosuid' not in mount_options_nosuid.stdout"
+  tags:
+    - V-257875
+    - RHEL-09-231170
+    - audit_mount_options
+
+###############################################
+# V-257879 | RHEL-09-231190
+# Rule Title: RHEL 9 local disk partitions must implement cryptographic mechanisms for data at rest.
+# Fix Text: Configure disk encryption for persistent filesystems (manual remediation may be required).
+###############################################
+- name: Check for encryption on persistent filesystems (V-257879)
+  command: lsblk --output TYPE,MOUNTPOINT --noheadings | grep -vE '(/boot|/boot/efi)' | grep -i crypt
+  register: crypt_check
+  ignore_errors: yes
+  changed_when: false
+  become: yes
+  tags:
+    - V-257879
+    - RHEL-09-231190
+    - encryption
+
+- name: Fail if persistent filesystems are not encrypted (V-257879)
+  fail:
+    msg: "Persistent filesystems are not encrypted. Remediation required."
+  when: crypt_check.stdout == ""
+  tags:
+    - V-257879
+    - RHEL-09-231190
+    - encryption

@@ -1,0 +1,91 @@
+###############################################
+# V-258037 | RHEL-09-251020
+# Rule Title: A RHEL 9 firewall must employ a deny-all, allow-by-exception policy for allowing connections to other systems.
+# Fix Text: Configure the "firewalld" daemon to employ a deny-all, allow-by-exception
+###############################################
+- name: Add required service exception (e.g., SSH) to the drop zone permanently
+  community.general.firewalld:
+    service: ssh
+    zone: drop
+    permanent: yes
+    state: enabled
+  become: yes
+  tags:
+    - V-257937
+    - RHEL-09-251020
+    - firewalld
+
+- name: Set default firewalld zone to drop (deny-all)
+  community.general.firewalld:
+    default_zone: drop
+    permanent: yes
+  become: yes
+  tags:
+    - V-257937
+    - RHEL-09-251020
+    - firewalld
+
+- name: Add interface "ens33" to the drop zone permanently
+  community.general.firewalld:
+    zone: drop
+    interface: ens33
+    permanent: yes
+    state: enabled
+  become: yes
+  tags:
+    - V-257937
+    - RHEL-09-251020
+    - firewalld
+
+- name: Reload firewalld to apply drop zone changes
+  command: firewall-cmd --reload
+  become: yes
+  tags:
+    - V-257937
+    - firewalld
+    - RHEL-09-251020
+
+###############################################
+# V-257940 | RHEL-09-251035
+# Update host firewall settings per PPSM CLSA and reload firewall rules.
+###############################################
+- name: Reload firewalld to update configuration (V-257940)
+  command: firewall-cmd --reload
+  become: yes
+  tags:
+    - V-257940
+    - firewalld
+    - RHEL-09-251035
+
+###############################################
+# V-257939 | RHEL-09-251030
+# Configure nftables as the default firewallbackend for firewalld.
+###############################################
+- name: Configure firewalld to use nftables as the default backend
+  lineinfile:
+    path: /etc/firewalld/firewalld.conf
+    regexp: '^FirewallBackend='
+    line: 'FirewallBackend=nftables'
+    backup: yes
+  become: yes
+  notify: reload_firewalld
+  tags:
+    - V-257939
+    - firewalld
+    - RHEL-09-251030
+
+###############################################
+# V-257936 | RHEL-09-251015
+# Rule Title: The firewalld service on RHEL 9 must be active.
+# Fix Text: Enable the firewalld service.
+###############################################
+- name: Ensure firewalld service is enabled and running (V-257936)
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - V-257936
+    - RHEL-09-251015
+    - firewalld
