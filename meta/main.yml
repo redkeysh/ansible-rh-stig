@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  author: Hunter S.
+  description: >
+    Ansible role for hardening RHEL 9 based on DISA STIG guidelines. This role configures auditd, SSH, firewall settings, package installations, and additional security controls per DISA and other security requirements.
+  company: YourCompany
+  license: GPL-3.0
+  min_ansible_version: 2.9
+  platforms:
+    - name: EL
+      versions:
+        - 9
+  galaxy_tags:
+    - rhel9
+    - disa-stig
+    - security
+    - hardening
+    - audit
+
+dependencies: []

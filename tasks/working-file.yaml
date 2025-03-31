@@ -1,0 +1,832 @@
+###############################################
+# V-257887 | RHEL-09-232035
+# Rule Title: RHEL 9 audit tools must have a mode of 0755 or less permissive.
+# Fix Text: Set audit tool binaries to mode 0755.
+###############################################
+- name: Ensure audit tools have mode 0755 or less permissive (V-257887)
+  file:
+    path: "{{ item }}"
+    mode: '0755'
+  loop:
+    - /sbin/auditctl
+    - /sbin/aureport
+    - /sbin/ausearch
+    - /sbin/autrace
+    - /sbin/auditd
+    - /sbin/rsyslogd
+    - /sbin/augenrules
+  become: yes
+  tags:
+    - V-257887
+    - RHEL-09-232035
+    - audit_tools
+
+###############################################
+# V-257924 | RHEL-09-232220
+# Rule Title: RHEL 9 audit tools must be owned by root.
+# Fix Text: Change the owner of audit tools to root.
+###############################################
+- name: Ensure audit tools are owned by root (V-257924)
+  file:
+    path: "{{ item }}"
+    owner: root
+  loop:
+    - /sbin/auditctl
+    - /sbin/aureport
+    - /sbin/ausearch
+    - /sbin/autrace
+    - /sbin/auditd
+    - /sbin/rsyslogd
+    - /sbin/augenrules
+  become: yes
+  tags:
+    - V-257924
+    - RHEL-09-232220
+    - audit_tools
+
+###############################################
+# V-257925 | RHEL-09-232225
+# Rule Title: RHEL 9 audit tools must be group-owned by root.
+# Fix Text: Change the group ownership of audit tools to root.
+###############################################
+- name: Ensure audit tools are group-owned by root (V-257925)
+  file:
+    path: "{{ item }}"
+    group: root
+  loop:
+    - /sbin/auditctl
+    - /sbin/aureport
+    - /sbin/ausearch
+    - /sbin/autrace
+    - /sbin/auditd
+    - /sbin/rsyslogd
+    - /sbin/augenrules
+  become: yes
+  tags:
+    - V-257925
+    - RHEL-09-232225
+    - audit_tools
+
+###############################################
+# V-257924 | RHEL-09-232220
+# Rule Title: RHEL 9 audit tools must be owned by root.
+# Fix Text: Configure the audit tools to be owned by "root".
+###############################################
+- name: Ensure audit tools are owned by root (V-257924)
+  file:
+    path: "{{ item }}"
+    owner: root
+  loop:
+    - /sbin/auditctl
+    - /sbin/aureport
+    - /sbin/ausearch
+    - /sbin/autrace
+    - /sbin/auditd
+    - /sbin/rsyslogd
+    - /sbin/augenrules
+  become: yes
+  tags:
+    - V-257924
+    - RHEL-09-232220
+    - audit_tools
+
+###############################################
+# V-257953 | RHEL-09-252060
+# Rule Title: RHEL 9 must forward mail from postmaster to the root account.
+# Fix Text: Append "postmaster: root" to /etc/aliases and run newaliases.
+###############################################
+- name: Ensure postmaster alias directs mail to root (V-257953)
+  lineinfile:
+    path: /etc/aliases
+    regexp: '^postmaster:'
+    line: 'postmaster: root'
+    create: yes
+  become: yes
+  notify: run newaliases
+  tags:
+    - V-257953
+    - RHEL-09-252060
+    - aliases
+
+###############################################
+# V-258037 | RHEL-09-291025
+# Rule Title: RHEL 9 must enable Linux audit logging for the USBGuard daemon.
+# Fix Text: Configure AuditBackend to "LinuxAudit" in /etc/usbguard/usbguard-daemon.conf.
+###############################################
+- name: Set AuditBackend to LinuxAudit in USBGuard daemon configuration (V-258037)
+  lineinfile:
+    path: /etc/usbguard/usbguard-daemon.conf
+    regexp: '^AuditBackend='
+    line: 'AuditBackend=LinuxAudit'
+    create: yes
+  become: yes
+  tags:
+    - V-258037
+    - RHEL-09-291025
+    - usbguard
+    - audit
+
+###############################################
+# V-258070 | RHEL-09-412045
+# Rule Title: RHEL 9 must log username information when unsuccessful logon attempts occur.
+# Fix Text: Configure /etc/security/faillock.conf with the "audit" option.
+###############################################
+- name: Ensure /etc/security/faillock.conf has audit option (V-258070)
+  lineinfile:
+    path: /etc/security/faillock.conf
+    regexp: '^audit\s*='
+    line: 'audit = audit'
+    create: yes
+  become: yes
+  tags:
+    - V-258070
+    - RHEL-09-412045
+    - faillock
+    - audit
+
+###############################################
+# V-258091 | RHEL-09-611010
+# Rule Title: RHEL 9 must ensure the password complexity module in the system-auth file
+# is configured for three retries or less.
+# Fix Text: Add/update "retry = 3" in /etc/security/pwquality.conf or a file under /etc/security/pwquality.conf.d/
+###############################################
+- name: Ensure pwquality retry value is set to 3 in /etc/security/pwquality.conf
+  lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^\s*retry\s*='
+    line: 'retry = 3'
+    create: yes
+  become: yes
+  tags:
+    - V-258091
+    - RHEL-09-611010
+    - pwquality
+    - password
+
+- name: Ensure pwquality retry value is set to 3 in /etc/security/pwquality.conf.d/99_custom.conf
+  lineinfile:
+    path: /etc/security/pwquality.conf.d/99_custom.conf
+    regexp: '^\s*retry\s*='
+    line: 'retry = 3'
+    create: yes
+  become: yes
+  tags:
+    - V-258091
+    - RHEL-09-611010
+    - pwquality
+    - password
+    
+###############################################
+# V-258146 | RHEL-09-652040
+# Rule Title: RHEL 9 must authenticate the remote logging server for offloading audit logs.
+# Fix Text: Set ActionSendStreamDriverAuthMode to x509/name in rsyslog configuration.
+###############################################
+- name: Ensure rsyslog authenticates remote logging server (ActionSendStreamDriverAuthMode)
+  lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^\$ActionSendStreamDriverAuthMode'
+    line: '$ActionSendStreamDriverAuthMode x509/name'
+    create: yes
+  become: yes
+  tags:
+    - V-258146
+    - RHEL-09-652040
+    - rsyslog
+    - remote_logging
+
+###############################################
+# V-258147 | RHEL-09-652045
+# Rule Title: RHEL 9 must encrypt offloaded audit records via rsyslog.
+# Fix Text: Set ActionSendStreamDriverMode to 1 in rsyslog configuration.
+###############################################
+- name: Ensure rsyslog encrypts offloaded audit records (ActionSendStreamDriverMode)
+  lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^\$ActionSendStreamDriverMode'
+    line: '$ActionSendStreamDriverMode 1'
+    create: yes
+  become: yes
+  tags:
+    - V-258147
+    - RHEL-09-652045
+    - rsyslog
+    - remote_logging
+
+###############################################
+# V-258148 | RHEL-09-652050
+# Rule Title: RHEL 9 must encrypt via the gtls driver the transfer of offloaded audit records.
+# Fix Text: Set DefaultNetstreamDriver to gtls in rsyslog configuration.
+###############################################
+- name: Ensure rsyslog uses the gtls driver for offloaded audit records
+  lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^\$DefaultNetstreamDriver'
+    line: '$DefaultNetstreamDriver gtls'
+    create: yes
+  become: yes
+  tags:
+    - V-258148
+    - RHEL-09-652050
+    - rsyslog
+    - remote_logging
+
+###############################################
+# V-257843 | RHEL-09-231010
+# Rule Title: A separate RHEL 9 file system must be used for user home directories.
+# Fix Text: Migrate the /home directory onto a separate file system.
+###############################################
+- name: Check if /home is mounted on a separate filesystem (V-257843)
+  command: mount | grep " on /home "
+  register: home_mount
+  changed_when: false
+  become: yes
+  tags:
+    - V-257843
+    - RHEL-09-231010
+
+- name: Fail if /home is not mounted on a separate filesystem (V-257843)
+  fail:
+    msg: "/home is not mounted on a separate filesystem. Remediation required."
+  when: home_mount.stdout == ""
+  tags:
+    - V-257843
+    - RHEL-09-231010
+
+###############################################
+# V-257847 | RHEL-09-231030
+# Rule Title: RHEL 9 must use a separate file system for the system audit data path.
+# Fix Text: Migrate /var/log/audit onto a separate file system.
+###############################################
+- name: Check if /var/log/audit is mounted on a separate filesystem (V-257847)
+  command: mount | grep " on /var/log/audit "
+  register: audit_mount
+  changed_when: false
+  become: yes
+  tags:
+    - V-257847
+    - RHEL-09-231030
+    - audit_partition
+
+- name: Fail if /var/log/audit is not mounted on a separate filesystem (V-257847)
+  fail:
+    msg: "/var/log/audit is not mounted on a separate filesystem. Remediation required."
+  when: audit_mount.stdout == ""
+  tags:
+    - V-257847
+    - RHEL-09-231030
+    - audit_partition
+
+###############################################
+# V-257873 | RHEL-09-231160
+# Rule Title: RHEL 9 must mount /var/log/audit with the nodev option.
+# Fix Text: Modify /etc/fstab or remount /var/log/audit with the nodev option.
+###############################################
+- name: Check /var/log/audit mount options for nodev (V-257873)
+  command: mount | grep " on /var/log/audit "
+  register: mount_options_nodev
+  changed_when: false
+  become: yes
+  tags:
+    - V-257873
+    - RHEL-09-231160
+    - audit_mount_options
+
+- name: Fail if /var/log/audit is not mounted with nodev (V-257873)
+  fail:
+    msg: "/var/log/audit is not mounted with nodev option. Remediation required."
+  when: "'nodev' not in mount_options_nodev.stdout"
+  tags:
+    - V-257873
+    - RHEL-09-231160
+    - audit_mount_options
+
+###############################################
+# V-257874 | RHEL-09-231165
+# Rule Title: RHEL 9 must mount /var/log/audit with the noexec option.
+# Fix Text: Modify /etc/fstab or remount /var/log/audit with the noexec option.
+###############################################
+- name: Check /var/log/audit mount options for noexec (V-257874)
+  command: mount | grep " on /var/log/audit "
+  register: mount_options_noexec
+  changed_when: false
+  become: yes
+  tags:
+    - V-257874
+    - RHEL-09-231165
+    - audit_mount_options
+
+- name: Fail if /var/log/audit is not mounted with noexec (V-257874)
+  fail:
+    msg: "/var/log/audit is not mounted with noexec option. Remediation required."
+  when: "'noexec' not in mount_options_noexec.stdout"
+  tags:
+    - V-257874
+    - RHEL-09-231165
+    - audit_mount_options
+
+###############################################
+# V-257875 | RHEL-09-231170
+# Rule Title: RHEL 9 must mount /var/log/audit with the nosuid option.
+# Fix Text: Modify /etc/fstab or remount /var/log/audit with the nosuid option.
+###############################################
+- name: Check /var/log/audit mount options for nosuid (V-257875)
+  command: mount | grep " on /var/log/audit "
+  register: mount_options_nosuid
+  changed_when: false
+  become: yes
+  tags:
+    - V-257875
+    - RHEL-09-231170
+    - audit_mount_options
+
+- name: Fail if /var/log/audit is not mounted with nosuid (V-257875)
+  fail:
+    msg: "/var/log/audit is not mounted with nosuid option. Remediation required."
+  when: "'nosuid' not in mount_options_nosuid.stdout"
+  tags:
+    - V-257875
+    - RHEL-09-231170
+    - audit_mount_options
+
+###############################################
+# V-257879 | RHEL-09-231190
+# Rule Title: RHEL 9 local disk partitions must implement cryptographic mechanisms for data at rest.
+# Fix Text: Configure disk encryption for persistent filesystems (manual remediation may be required).
+###############################################
+- name: Check for encryption on persistent filesystems (V-257879)
+  command: lsblk --output TYPE,MOUNTPOINT --noheadings | grep -vE '(/boot|/boot/efi)' | grep -i crypt
+  register: crypt_check
+  ignore_errors: yes
+  changed_when: false
+  become: yes
+  tags:
+    - V-257879
+    - RHEL-09-231190
+    - encryption
+
+- name: Fail if persistent filesystems are not encrypted (V-257879)
+  fail:
+    msg: "Persistent filesystems are not encrypted. Remediation required."
+  when: crypt_check.stdout == ""
+  tags:
+    - V-257879
+    - RHEL-09-231190
+    - encryption
+
+###############################################
+# V-257788 | RHEL-09-212015
+# Rule Title: RHEL 9 must disable the ability of systemd to spawn an interactive boot process.
+# Fix Text: Remove the "systemd.confirm_spawn" argument from GRUB 2 configuration.
+###############################################
+- name: Disable interactive boot process (remove systemd.confirm_spawn) (V-257788)
+  command: grubby --update-kernel=ALL --remove-args="systemd.confirm_spawn"
+  become: yes
+  tags:
+    - V-257788
+    - RHEL-09-212015
+    - interactive_boot
+
+###############################################
+# V-257796 | RHEL-09-212055
+# Rule Title: RHEL 9 must enable auditing of processes that start prior to the audit daemon.
+# Fix Text: Enable auditing via GRUB kernel arguments.
+###############################################
+- name: Enable auditing of early processes via GRUB (V-257796)
+  command: grubby --update-kernel=ALL --args="audit=1"
+  become: yes
+  tags:
+    - V-257796
+    - RHEL-09-212055
+    - audit_pre_daemonb
+
+###############################################
+# V-257782 | rng-tools
+# Install rng-tools and enable the rngd service.
+###############################################
+- name: Ensure rng-tools package is installed (V-257782)
+  package:
+    name: rng-tools
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.rng_tools
+  tags:
+    - V-257782
+    - rng_tools
+
+- name: Ensure rngd service is enabled and running (V-257782)
+  service:
+    name: rngd
+    state: started
+    enabled: yes
+  become: yes
+  when: ansible-rh-stig.services.rngd
+  tags:
+    - V-257782
+    - rngd
+
+###############################################
+# V-257839 | gnutls-utils
+# Install gnutls-utils package.
+###############################################
+- name: Ensure gnutls-utils package is installed (V-257839)
+  package:
+    name: gnutls-utils
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.gnutls_utils
+  tags:
+    - V-257839
+    - gnutls_utils
+
+###############################################
+# V-257840 | nss-tools
+# Install nss-tools package.
+###############################################
+- name: Ensure nss-tools package is installed (V-257840)
+  package:
+    name: nss-tools
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.nss_tools
+  tags:
+    - V-257840
+    - nss_tools
+
+###############################################
+# V-257838 | openssl-pkcs11
+# Install openssl-pkcs11 package.
+###############################################
+- name: Ensure openssl-pkcs11 package is installed (V-257838)
+  package:
+    name: openssl-pkcs11
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.openssl_pkcs11
+  tags:
+    - V-257838
+    - openssl_pkcs11
+
+###############################################
+# V-257842 | s-nail
+# Install s-nail package.
+###############################################
+- name: Ensure s-nail package is installed (V-257842)
+  package:
+    name: s-nail
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.s_nail
+  tags:
+    - V-257842
+    - s_nail
+
+###############################################
+# V-257935 | firewalld
+# Ensure firewalld package is installed.
+###############################################
+- name: Ensure firewalld package is installed (V-257935)
+  package:
+    name: firewalld
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.firewalld
+  tags:
+    - V-257935
+    - firewalld
+
+###############################################
+# V-257954 | libreswan
+# Install libreswan package.
+###############################################
+- name: Ensure libreswan package is installed (V-257954)
+  package:
+    name: libreswan
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.libreswan
+  tags:
+    - V-257954
+    - libreswan
+
+###############################################
+# V-257978 | openssh-server
+# Install openssh-server package.
+###############################################
+- name: Ensure openssh-server package is installed (V-257978)
+  package:
+    name: openssh-server
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.openssh_server
+  tags:
+    - V-257978
+    - openssh_server
+
+###############################################
+# V-257980 | openssh-clients
+# Install openssh-clients package.
+###############################################
+- name: Ensure openssh-clients package is installed (V-257980)
+  package:
+    name: openssh-clients
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.openssh_clients
+  tags:
+    - V-257980
+    - openssh_clients
+
+###############################################
+# V-258035 | usbguard
+# Install usbguard package and enable its service.
+###############################################
+- name: Ensure usbguard package is installed (V-258035)
+  package:
+    name: usbguard
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.usbguard
+  tags:
+    - V-258035
+    - usbguard
+
+- name: Ensure usbguard service is enabled and running (V-258035)
+  service:
+    name: usbguard
+    state: started
+    enabled: yes
+  become: yes
+  when: ansible-rh-stig.services.usbguard
+  tags:
+    - V-258035
+    - usbguard
+
+###############################################
+# V-258081 | policycoreutils
+# Install policycoreutils package.
+###############################################
+- name: Ensure policycoreutils package is installed (V-258081)
+  package:
+    name: policycoreutils
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.policycoreutils
+  tags:
+    - V-258081
+    - policycoreutils
+
+###############################################
+# V-258082 | policycoreutils-python-utils
+# Install policycoreutils-python-utils package.
+###############################################
+- name: Ensure policycoreutils-python-utils package is installed (V-258082)
+  package:
+    name: policycoreutils-python-utils
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.policycoreutils_python_utils
+  tags:
+    - V-258082
+    - policycoreutils_python_utils
+
+###############################################
+# V-258083 | sudo
+# Install sudo package.
+###############################################
+- name: Ensure sudo package is installed (V-258083)
+  package:
+    name: sudo
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.sudo
+  tags:
+    - V-258083
+    - sudo
+
+###############################################
+# V-258089 | fapolicyd
+# Install fapolicyd package.
+###############################################
+- name: Ensure fapolicyd package is installed (V-258089)
+  package:
+    name: fapolicyd
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.fapolicyd
+  tags:
+    - V-258089
+    - fapolicyd
+
+###############################################
+# V-258124 | pcsc-lite
+# Install pcsc-lite package.
+###############################################
+- name: Ensure pcsc-lite package is installed (V-258124)
+  package:
+    name: pcsc-lite
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.pcsc_lite
+  tags:
+    - V-258124
+    - pcsc_lite
+
+###############################################
+# V-258126 | opensc
+# Install opensc package.
+###############################################
+- name: Ensure opensc package is installed (V-258126)
+  package:
+    name: opensc
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.opensc
+  tags:
+    - V-258126
+    - opensc
+
+###############################################
+# V-258134 | AIDE
+# Install AIDE, initialize its database, and verify its existence.
+###############################################
+- name: Ensure AIDE package is installed (V-258134)
+  package:
+    name: aide
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.aide
+  tags:
+    - V-258134
+    - aide
+
+- name: Initialize AIDE database if not already initialized (V-258134)
+  command: /usr/sbin/aide --init
+  args:
+    creates: /var/lib/aide/aide.db.new.gz
+  become: yes
+  when: ansible-rh-stig.packages.aide
+  tags:
+    - V-258134
+    - aide
+
+- name: Check if AIDE database exists (V-258134)
+  stat:
+    path: /var/lib/aide/aide.db.gz
+  register: aide_db
+  become: yes
+  when: ansible-rh-stig.packages.aide
+  tags:
+    - V-258134
+    - aide
+
+- name: Fail if AIDE database is missing (V-258134)
+  fail:
+    msg: "AIDE database /var/lib/aide/aide.db.gz is missing."
+  when: ansible-rh-stig.packages.aide and not aide_db.stat.exists
+  tags:
+    - V-258134
+    - aide
+
+###############################################
+# V-258140 | rsyslogd
+# Install rsyslog package.
+###############################################
+- name: Ensure rsyslog package is installed (V-258140)
+  package:
+    name: rsyslog
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.rsyslog
+  tags:
+    - V-258140
+    - rsyslog
+
+###############################################
+# V-258141 | rsyslog-gnutls
+# Install rsyslog-gnutls package.
+###############################################
+- name: Ensure rsyslog-gnutls package is installed (V-258141)
+  package:
+    name: rsyslog-gnutls
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.rsyslog_gnutls
+  tags:
+    - V-258141
+    - rsyslog_gnutls
+
+###############################################
+# V-258151 | audit
+# Install audit package.
+###############################################
+- name: Ensure audit package is installed (V-258151)
+  package:
+    name: audit
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.audit
+  tags:
+    - V-258151
+    - audit
+
+###############################################
+# V-258175 | audispd-plugins
+# Install audispd-plugins package.
+###############################################
+- name: Ensure audispd-plugins package is installed (V-258175)
+  package:
+    name: audispd-plugins
+    state: present
+  become: yes
+  when: ansible-rh-stig.packages.audispd_plugins
+  tags:
+    - V-258175
+    - audispd_plugins
+
+###############################################
+# V-258078 | RHEL-09-431010
+# Rule Title: RHEL 9 must use a Linux Security Module configured to enforce limits on system services.
+# Fix Text: Ensure SELinux is set to "enforcing".
+###############################################
+- name: Ensure SELinux is set to enforcing in /etc/selinux/config (V-258078)
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: 'SELINUX=enforcing'
+    create: yes
+  become: yes
+  tags:
+    - V-258078
+    - RHEL-09-431010
+    - selinux
+
+- name: Verify SELinux is enforcing (V-258078)
+  command: getenforce
+  register: selinux_status
+  changed_when: false
+  become: yes
+  tags:
+    - V-258078
+    - RHEL-09-431010
+    - selinux
+
+- name: Fail if SELinux is not enforcing (V-258078)
+  fail:
+    msg: "SELinux is not enforcing. Remediation required."
+  when: selinux_status.stdout | lower != "enforcing"
+  tags:
+    - V-258078
+    - RHEL-09-431010
+    - selinux
+
+###############################################
+# V-257979 | RHEL-09-255015
+# Rule Title: The sshd service on RHEL 9 must be active.
+# Fix Text: Enable the sshd service.
+###############################################
+- name: Ensure sshd service is enabled and running (V-257979)
+  service:
+    name: "sshd"
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - V-257979
+    - RHEL-09-255015
+    - sshd
+
+###############################################
+# V-258001 | RHEL-09-255125
+# Rule Title: SSH public host key files must have mode 0644.
+# Fix Text: Change the mode of public host key files under /etc/ssh to 0644.
+###############################################
+- name: Ensure SSH public host key files have mode {{ ansible-rh-stig.ssh.pubkey_mode }} (V-258001)
+  file:
+    path: "{{ item }}"
+    mode: "{{ ansible-rh-stig.ssh.pubkey_mode }}"
+    owner: "{{ ansible-rh-stig.ssh.pubkey_owner }}"
+    group: "{{ ansible-rh-stig.ssh.pubkey_group }}"
+  loop: "{{ lookup('fileglob', '/etc/ssh/*key.pub', wantlist=True) }}"
+  become: yes
+  notify: restart sshd
+  tags:
+    - V-258001
+    - RHEL-09-255125
+    - sshd
+
+###############################################
+# V-257779 | RHEL-09-211020
+# Rule Title: Ensure /etc/issue contains the correct banner
+# Fix Text: Configure RHEL 9 to display the Standard Mandatory DOD Notice and Consent Banner
+###############################################
+- name: Ensure /etc/issue contains the correct banner (V-257779)
+  copy:
+    src: issue-banner.txt
+    dest: /etc/issue
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  tags:
+    - V-257779
+    - banner

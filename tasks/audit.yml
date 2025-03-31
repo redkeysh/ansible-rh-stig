@@ -1,5 +1,3 @@
-
-
 - name: Ensure GRUB_CMDLINE_LINUX includes audit=1 in /etc/default/grub (V-257796)
   lineinfile:
     path: /etc/default/grub
