@@ -1,0 +1,161 @@
+---
+- name: Verify SSH and Crypto Policy Settings
+  hosts: all
+  become: yes
+  gather_facts: no
+  vars:
+    required_ciphers: "aes256-gcm@openssh.com,aes256-ctr,aes128-gcm@openssh.com,aes128-ctr"
+    required_macs: "hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha2-256,hmac-sha2-512"
+    scopes_and_wildcards_content: |
+      # Disable CHACHA20-POLY1305 for the TLS protocol (OpenSSL, GnuTLS, NSS, and OpenJDK)
+      cipher@TLS = -CHACHA20-POLY1305
+
+      # Disable all CBC mode ciphers for the SSH protocol (libssh and OpenSSH)
+      cipher@SSH = -*-CBC
+    openssh_subpolicy_content: |
+      # Define ciphers for OpenSSH
+      cipher@SSH=AES-256-GCM AES-128-GCM AES-256-CTR AES-128-CTR
+
+      # Define MACs for OpenSSH
+      mac@SSH=HMAC-SHA2-512 HMAC-SHA2-256
+    require_pmod_content: |
+      @OPENSSH-SUBPOLICY
+      @SCOPES-AND-WILDCARDS
+
+  tasks:
+    #############################################################
+    # V-257988: SSH configuration verification
+    #############################################################
+    - name: "V-257988: Check /etc/ssh/sshd_config contains the include for sshd_config.d"
+      ansible.builtin.slurp:
+        src: /etc/ssh/sshd_config
+      register: sshd_config_content
+
+    - name: Ensure Include directive exists in /etc/ssh/sshd_config
+      ansible.builtin.assert:
+        that:
+          - sshd_config_content is defined
+          - "'Include /etc/ssh/sshd_config.d/*.conf' in (sshd_config_content.content | b64decode)"
+        fail_msg: "The file /etc/ssh/sshd_config must include 'Include /etc/ssh/sshd_config.d/*.conf'."
+        success_msg: "Found 'Include /etc/ssh/sshd_config.d/*.conf' in /etc/ssh/sshd_config."
+
+    - name: "V-257988: Check that /etc/ssh/sshd_config.d/50-redhat.conf exists"
+      ansible.builtin.stat:
+        path: /etc/ssh/sshd_config.d/50-redhat.conf
+      register: redhat_conf_stat
+
+    - name: Copy local /etc/ssh/sshd_config.d/50-redhat.conf to remote server if it doesn't exist
+      ansible.builtin.copy:
+        src: /etc/ssh/sshd_config.d/50-redhat.conf
+        dest: /etc/ssh/sshd_config.d/50-redhat.conf
+        owner: root
+        group: root
+        mode: '0600'
+      when: not redhat_conf_stat.stat.exists
+    
+    - name: Assert that /etc/ssh/sshd_config.d/50-redhat.conf exists on the remote host
+      ansible.builtin.assert:
+        that:
+          - redhat_conf_stat.stat.exists or (lookup('file', '/etc/ssh/sshd_config.d/50-redhat.conf') is defined)
+        fail_msg: "/etc/ssh/sshd_config.d/50-redhat.conf does not exist."
+        success_msg: "/etc/ssh/sshd_config.d/50-redhat.conf exists."
+
+    - name: "V-257988: Verify that 50-redhat.conf includes the systemwide policy include line"
+      ansible.builtin.slurp:
+        src: /etc/ssh/sshd_config.d/50-redhat.conf
+      register: redhat_conf_content
+
+    - name: Ensure proper Include directive exists in 50-redhat.conf
+      ansible.builtin.assert:
+        that:
+          - "'Include /etc/crypto-policies/back-ends/opensshserver.config' in (redhat_conf_content.content | b64decode)"
+        fail_msg: "The file /etc/ssh/sshd_config.d/50-redhat.conf must include 'Include /etc/crypto-policies/back-ends/opensshserver.config'."
+        success_msg: "Found 'Include /etc/crypto-policies/back-ends/opensshserver.config' in /etc/ssh/sshd_config.d/50-redhat.conf."
+
+    #############################################################
+    # V-257989 & V-257991: Systemwide OpenSSH crypto configurations
+    #############################################################
+    - name: "V-257989 & V-257991: Verify that /etc/crypto-policies/back-ends/opensshserver.config exists"
+      ansible.builtin.stat:
+        path: /etc/crypto-policies/back-ends/opensshserver.config
+      register: opensshserver_config_stat
+
+    - name: Ensure /etc/crypto-policies/back-ends/opensshserver.config exists
+      ansible.builtin.assert:
+        that:
+          - opensshserver_config_stat.stat.exists
+        fail_msg: "/etc/crypto-policies/back-ends/opensshserver.config does not exist."
+        success_msg: "/etc/crypto-policies/back-ends/opensshserver.config exists."
+
+    - name: "V-257989: Slurp /etc/crypto-policies/back-ends/opensshserver.config content"
+      ansible.builtin.slurp:
+        src: /etc/crypto-policies/back-ends/opensshserver.config
+      register: opensshserver_config
+
+    - name: Assert that the Ciphers line is as expected in opensshserver.config
+      ansible.builtin.assert:
+        that:
+          - (opensshserver_config.content | b64decode).splitlines() | select("match", "^Ciphers\\s") | list | length > 0
+          - (opensshserver_config.content | b64decode).splitlines() 
+              | select("match", "^Ciphers\\s") | list | first 
+              | regex_replace("^Ciphers\\s+", "") | trim == required_ciphers
+        fail_msg: "The Ciphers entry in /etc/crypto-policies/back-ends/opensshserver.config is missing, commented out, or does not match the required value."
+        success_msg: "The Ciphers entry is correctly configured."
+
+    - name: Assert that the MACs line is as expected in opensshserver.config
+      ansible.builtin.assert:
+        that:
+          - (opensshserver_config.content | b64decode).splitlines() | select("match", "^MACs\\s") | list | length > 0
+          - (opensshserver_config.content | b64decode).splitlines() 
+              | select("match", "^MACs\\s") | list | first 
+              | regex_replace("^MACs\\s+", "") | trim == required_macs
+        fail_msg: "The MACs entry in /etc/crypto-policies/back-ends/opensshserver.config is missing, commented out, or does not match the required value."
+        success_msg: "The MACs entry is correctly configured."
+
+    #############################################################
+    # V-258241: Create or update policy submodules and apply FIPS
+    #############################################################
+    - name: "V-258241: Ensure SCOPES-AND-WILDCARDS policy module file is present with the proper content"
+      ansible.builtin.copy:
+        dest: /etc/crypto-policies/policies/modules/SCOPES-AND-WILDCARDS.pmod
+        content: "{{ scopes_and_wildcards_content }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: "V-258241: Ensure OPENSSH-SUBPOLICY policy module file is present with the proper content"
+      ansible.builtin.copy:
+        dest: /etc/crypto-policies/policies/modules/OPENSSH-SUBPOLICY.pmod
+        content: "{{ openssh_subpolicy_content }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: "V-258241: Ensure REQUIRE.pmod file includes the subpolicies"
+      ansible.builtin.copy:
+        dest: /etc/crypto-policies/policies/modules/REQUIRE.pmod
+        content: "{{ require_pmod_content }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: "V-258241: Apply the FIPS systemwide cryptographic policy"
+      ansible.builtin.command: update-crypto-policies --set FIPS
+      register: update_crypto
+      changed_when: update_crypto.rc == 0
+
+    - name: "V-258241: Verify that systemwide crypto policy is set to FIPS"
+      ansible.builtin.command: update-crypto-policies --show
+      register: crypto_policy_show
+
+    - name: Assert that crypto policy is FIPS
+      ansible.builtin.assert:
+        that:
+          - "'FIPS' in crypto_policy_show.stdout"
+        fail_msg: "The systemwide crypto policy is not set to 'FIPS'."
+        success_msg: "The systemwide crypto policy is set to 'FIPS'."
+
+    - name: "V-258241: Read current crypto policy configuration file"
+      ansible.builtin.slurp:
+        src: /etc/crypto-policies/state/CURRENT.pol
+      register: current_pol
